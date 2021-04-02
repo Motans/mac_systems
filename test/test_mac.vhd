@@ -48,6 +48,7 @@ component mac_mult is
   port(
     clk         :   in  std_logic;
     strobe      :   in  std_logic;
+    reset       :   in  std_logic;
     coef        :   in  std_logic_vector(IWL-1 downto 0);
     sig         :   in  std_logic_vector(IWL-1 downto 0);
     word_out    :   out std_logic_vector(OWL-1 downto 0) 
@@ -63,6 +64,7 @@ end component;
     signal      clk             :   std_logic;
     signal      clk_mac         :   std_logic;
     signal      strobe          :   std_logic;
+    signal      reset           :   std_logic;
 
     signal      coef            :   std_logic_vector(CWL-1 downto 0);
     signal      sig             :   std_logic_vector(IWL-1 downto 0);
@@ -72,10 +74,11 @@ end component;
     clk_event(clk, FREQ, 2*N);
     strobe_event(strobe, FREQ/2.0, 0.5 sec / FREQ, N);
     
+    reset <= '0';
     clk_mac <= clk;
     mac0: mac_mult
         generic map(IWL, CWL, OWL)
-        port map(clk_mac, strobe, coef, sig, out_res);
+        port map(clk_mac, strobe, reset, coef, sig, out_res);
 	
     event: process(clk)
         variable i : integer := 0;
