@@ -23,7 +23,8 @@ end symmetric_filter;
 
 
 architecture symmetric_filter_arch of symmetric_filter is
-    type vector_array is array (natural range<>) of std_logic_vector;
+    type vector_array_IWL is array (natural range<>) of std_logic_vector(IWL-1 downto 0);
+    type vector_array_CWL is array (natural range<>) of std_logic_vector(CWL-1 downto 0);
 
 component mac_mult is
   generic(
@@ -41,7 +42,7 @@ component mac_mult is
   );
 end component;
 
-procedure push_front(signal queue : inout vector_array(0 to N-1)(IWL-1 downto 0);
+procedure push_front(signal queue : inout vector_array_IWL(0 to N-1);
                      signal val   : in    std_logic_vector(IWL-1 downto 0)) is
   begin
     for i in N-1 downto 1 loop
@@ -51,7 +52,7 @@ procedure push_front(signal queue : inout vector_array(0 to N-1)(IWL-1 downto 0)
     queue(0) <= val;
 end procedure;
 
-function ret_val(signal queue : vector_array(0 to N-1)(IWL-1 downto 0);
+function ret_val(signal queue : vector_array_IWL(0 to N-1);
                  signal i     : integer range 0 to N)
     return std_logic_vector is
   begin
@@ -63,7 +64,7 @@ function ret_val(signal queue : vector_array(0 to N-1)(IWL-1 downto 0);
     end if;
 end function;
 
-    constant COEF : vector_array(0 to N-1)(CWL-1 downto 0) := 
+    constant COEF : vector_array_CWL(0 to N-1) := 
         (others => std_logic_vector(
                     to_signed(integer(ceil(0.125 * 2.0**(CWL-1))), 
                               CWL)));
@@ -74,7 +75,7 @@ end function;
     signal mac_sig      : std_logic_vector(IWL-1 downto 0);
     signal mac_out      : std_logic_vector(OWL-1 downto 0);
 
-    signal sig_buf      : vector_array(0 to N-1)(IWL-1 downto 0);
+    signal sig_buf      : vector_array_IWL(0 to N-1);
     signal i            : integer range 0 to N;
   begin
     mac0: mac_mult
