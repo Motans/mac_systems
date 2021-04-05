@@ -4,12 +4,13 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 
-entity simple_filter is
+entity symmetric_filter is
   generic(
     IWL         :       natural := 16;              -- input word length
     CWL         :       natural := 16;              -- coefficient word length
     OWL         :       natural := 16;              -- output word length
-    N           :       natural := 8                -- fiter order
+    N           :       natural := 8;               -- fiter order
+    symmetric   :       boolean
   );
   port(
     clk         :   in  std_logic;
@@ -18,10 +19,10 @@ entity simple_filter is
     sig_in      :   in  std_logic_vector(IWL-1 downto 0);
     sig_out     :   out std_logic_vector(OWL-1 downto 0) 
   );
-end simple_filter;
+end symmetric_filter;
 
 
-architecture simple_filter_arch of simple_filter is
+architecture symmetric_filter_arch of symmetric_filter is
     type vector_array is array (natural range<>) of std_logic_vector;
 
 component mac_mult is
@@ -49,58 +50,76 @@ procedure push_front(signal queue : inout vector_array(0 to N-1)(IWL-1 downto 0)
 
     queue(0) <= val;
 end procedure;
-    constant COEF : vector_array(0 to N-1)(CWL-1 downto 0) := (
-        0 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
-                              CWL)),
-        1 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
-                                CWL)),
-        2 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
-                                CWL)),
-        3 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
-                                CWL)),
-        4 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**5) * 2.0**(CWL-1))), 
-                                CWL)),
-        5 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**6) * 2.0**(CWL-1))), 
-                                CWL)),
-        6 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**7) * 2.0**(CWL-1))), 
-                                CWL)),
-        7 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
-                                CWL)));
+
+function ret_val(signal queue : vector_array(0 to N-1)(IWL-1 downto 0);
+                 signal i     : integer range 0 to N)
+    return std_logic_vector is
+  begin
+    if (i = N - 1 - i) then
+        return queue(i);
+    else
+        return std_logic_vector(
+            signed(queue(i)) + signed(queue(N - i - 1)));
+    end if;
+end function;
+
+    constant COEF : vector_array(0 to N-1)(CWL-1 downto 0) := 
+        (others => std_logic_vector(
+                    to_signed(integer(ceil(0.125 * 2.0**(CWL-1))), 
+                              CWL)));
+
+    signal mac_clk      : std_logic;
 
     signal mac_coef     : std_logic_vector(CWL-1 downto 0);
     signal mac_sig      : std_logic_vector(IWL-1 downto 0);
     signal mac_out      : std_logic_vector(OWL-1 downto 0);
 
     signal sig_buf      : vector_array(0 to N-1)(IWL-1 downto 0);
-    signal state        : integer range 0 to N;
+    signal i            : integer range 0 to N;
   begin
     mac0: mac_mult
         generic map(IWL, CWL, OWL)
         port map(clk, strobe, reset, mac_coef, mac_sig, mac_out);
-    sig_out  <= mac_out;
-    mac_sig  <= sig_buf(state);
-    mac_coef <= COEF(state);
 
-    filt_main_proc : process(clk, reset)
+symm : if symmetric generate
+    sig_out  <= mac_out;
+    mac_sig  <= ret_val(sig_buf, i);
+    mac_coef <= COEF(i); 
+
+    symm_main_proc : process(clk, reset)
       begin
         if (reset = '1') then
-            state   <= 0;
+            i   <= 0;
             sig_buf <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
-            state <= state + 1 when state < N-1 else state;
+            i <= i + 1 when i < integer(ceil(real(N) / 2.0)) else i;
 
             if (strobe = '1') then
-                state <= 0;
+                i <= 0;
                 push_front(sig_buf, sig_in);
             end if;
         end if;
     end process;
-end simple_filter_arch;
+end generate;
+
+not_symm : if not symmetric generate
+    sig_out  <= mac_out;
+    mac_sig  <= sig_buf(i);
+    mac_coef <= COEF(i);
+
+    not_symm_main_proc : process(clk, reset)
+      begin
+        if (reset = '1') then
+            i       <= 0;
+            sig_buf <= (others => (others => '0'));
+        elsif (clk'event and clk = '1') then
+            i <= i + 1 when i < N-1 else i;
+
+            if (strobe = '1') then
+                i <= 0;
+                push_front(sig_buf, sig_in);
+            end if;
+        end if;
+    end process;
+end generate;
+end symmetric_filter_arch;

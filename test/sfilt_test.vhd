@@ -87,8 +87,12 @@ end component;
             i := 0;
         elsif(clk'event and clk = '1') then
             if (strobe = '1') then 
-                sig <= std_logic_vector(
-                    to_signed((2**(IWL-1) / 5) + ((-1)**i) * (2**(IWL-1) / 10), CWL));
+                if (i = 0) then 
+                    sig <= std_logic_vector(
+                        to_signed(2**(IWL-1) - 1, CWL));
+                else
+                    sig <= (others => '0');
+                end if;
                 i := i + 1;
             end if;
         end if;
