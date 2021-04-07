@@ -64,12 +64,33 @@ function ret_val(signal queue : vector_array_IWL(0 to N-1);
     end if;
 end function;
 
-    constant COEF : vector_array_CWL(0 to N-1) := 
-        (others => std_logic_vector(
-                    to_signed(integer(ceil(0.125 * 2.0**(CWL-1))), 
-                              CWL)));
-
-    signal mac_clk      : std_logic;
+    constant COEF : vector_array_CWL(0 to N-1) := (-- others => std_logic_vector(
+                    -- to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
+                    --           CWL)));
+        0 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
+                              CWL)),
+        1 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
+                                CWL)),
+        2 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
+                                CWL)),
+        3 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
+                                CWL)),
+        4 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**5) * 2.0**(CWL-1))), 
+                                CWL)),
+        5 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**6) * 2.0**(CWL-1))), 
+                                CWL)),
+        6 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**7) * 2.0**(CWL-1))), 
+                                CWL)),
+        7 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
+                                CWL)));
 
     signal mac_coef     : std_logic_vector(CWL-1 downto 0);
     signal mac_sig      : std_logic_vector(IWL-1 downto 0);
@@ -89,21 +110,21 @@ symm : if symmetric generate
     even : if (N rem 2 = 0) generate
         even_sum : for j in 0 to size_2-1 generate
             buf_2(j) <= std_logic_vector(
-                signed(sig_buf(i)) + signed(sig_buf(N - i - 1)));
+                signed(sig_buf(j)) + signed(sig_buf(N - j - 1)));
         end generate;
     end generate;
 
     odd : if (N rem 2 = 1) generate
         odd_sum : for j in 0 to size_2-2 generate
             buf_2(j) <= std_logic_vector(
-                signed(sig_buf(i)) + signed(sig_buf(N - i - 1)));
+                signed(sig_buf(j)) + signed(sig_buf(N - j - 1)));
         end generate;
         buf_2(size_2-1) <= sig_buf(size_2-1);
     end generate;
 
     sig_out  <= mac_out;
     mac_sig  <= buf_2(i);
-    mac_coef <= COEF(i); 
+    mac_coef <= COEF(i);
 
     symm_main_proc : process(clk, reset)
       begin
@@ -111,7 +132,7 @@ symm : if symmetric generate
             i   <= 0;
             sig_buf <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
-            i <= i + 1;-- when i < integer(ceil(real(N) / 2.0)) else i;
+            i <= i + 1 when i < size_2-1 else i;
 
             if (strobe = '1') then
                 i <= 0;

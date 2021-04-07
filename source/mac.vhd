@@ -32,6 +32,8 @@ architecture mac_mult_arch of mac_mult is
             word_out <= (others => '0');
             acc      := (others => '0');
         elsif (clk'event and clk = '1') then
+            acc := acc + signed(coef) * signed(sig);
+
             if (strobe = '1') then
                 res     := (others => '0');
                 sat_res := acc(AWL-1 downto AWL - OWL - 1);
@@ -46,8 +48,6 @@ architecture mac_mult_arch of mac_mult is
                 word_out <= std_logic_vector(res);
                 acc      := (others => '0');
             end if;
-
-            acc := acc + signed(coef) * signed(sig);
         end if;
     end process;
 end mac_mult_arch;

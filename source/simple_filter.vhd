@@ -49,31 +49,33 @@ procedure push_front(signal queue : inout vector_array(0 to N-1)(IWL-1 downto 0)
 
     queue(0) <= val;
 end procedure;
-    constant COEF : vector_array(0 to N-1)(CWL-1 downto 0) := (
-        0 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
-                              CWL)),
-        1 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
-                                CWL)),
-        2 => std_logic_vector(
+    constant COEF : vector_array(0 to N-1)(CWL-1 downto 0) := ( others => std_logic_vector(
                     to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
-                                CWL)),
-        3 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
-                                CWL)),
-        4 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**5) * 2.0**(CWL-1))), 
-                                CWL)),
-        5 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**6) * 2.0**(CWL-1))), 
-                                CWL)),
-        6 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**7) * 2.0**(CWL-1))), 
-                                CWL)),
-        7 => std_logic_vector(
-                    to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
-                                CWL)));
+                              CWL)));
+        -- 0 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
+        --                       CWL)),
+        -- 1 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 2 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 3 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 4 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**5) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 5 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**6) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 6 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**7) * 2.0**(CWL-1))), 
+        --                         CWL)),
+        -- 7 => std_logic_vector(
+        --             to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
+        --                         CWL)));
 
     signal mac_coef     : std_logic_vector(CWL-1 downto 0);
     signal mac_sig      : std_logic_vector(IWL-1 downto 0);
