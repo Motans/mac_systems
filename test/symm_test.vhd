@@ -61,9 +61,9 @@ end component;
     constant    CWL         :   integer := 16;
     constant    OWL         :   integer := 16;
     constant    N           :   natural := 2**10;
-    constant    ORDER       :   natural := 8;
+    constant    ORDER       :   natural := 9;
     constant    FREQ        :   real    := 1000.0;
-    constant    TK          :   integer := integer(ceil(real(N) / 2.0));
+    constant    TK          :   integer := integer(ceil(real(ORDER) / 2.0));
 
     signal      clk         :   std_logic;
     signal      clk_filt    :   std_logic;
@@ -75,8 +75,8 @@ end component;
 
   begin
     clk_event(clk, FREQ, TK*N);
-    strobe_event(strobe, FREQ/4.0, 0.5 sec / FREQ, N);
-    reset <= '1', '0' after 4 ms;
+    strobe_event(strobe, FREQ/real(TK), 0.5 sec / FREQ, N);
+    reset <= '1', '0' after (real(TK) * sec / FREQ);
     clk_filt <= clk;
 
     filt0: symmetric_filter

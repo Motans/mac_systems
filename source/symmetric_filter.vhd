@@ -90,6 +90,9 @@ end function;
                                 CWL)),
         7 => std_logic_vector(
                     to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
+                                CWL)),
+        8 => std_logic_vector(
+                    to_signed(integer(ceil((0.5**9) * 2.0**(CWL-1))), 
                                 CWL)));
 
     signal mac_coef     : std_logic_vector(CWL-1 downto 0);
