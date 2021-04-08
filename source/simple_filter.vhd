@@ -97,9 +97,9 @@ end procedure;
             state   <= 0;
             sig_buf <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
-            state <= state + 1 when state < N-1 else state;
-
-            if (strobe = '1') then
+            if (strobe /= '1') then
+                state <= state + 1;
+            else 
                 state <= 0;
                 push_front(sig_buf, sig_in);
             end if;

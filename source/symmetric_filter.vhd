@@ -135,9 +135,9 @@ symm : if symmetric generate
             i   <= 0;
             sig_buf <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
-            i <= i + 1;-- when i < size_2-1 else i;
-
-            if (strobe = '1') then
+            if (strobe /= '1') then
+                i <= i + 1;
+            else 
                 i <= 0;
                 push_front(sig_buf, sig_in);
             end if;
