@@ -69,16 +69,52 @@ symm : if symmetric generate
     constant BUF_SIZE   : natural := natural(ceil(real(SIZE_2) / real(cores))) * cores;
     constant COEF       : vector_array_CWL(0 to BUF_SIZE-1) := (
         0   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
                               CWL)),
         1   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
                               CWL)),
         2   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
                               CWL)),
         3   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
+                              CWL)),
+        4   =>  std_logic_vector(
+                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
+                              CWL)),
+        5   =>  std_logic_vector(
+                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
+                              CWL)),
+        6   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
+                              CWL)),
+        7   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
+                              CWL)),
+        8   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
+                              CWL)),
+        9   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
+                              CWL)),
+        10  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
+                              CWL)),
+        11  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
+                              CWL)),
+        12  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
+                              CWL)),
+        13  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
+                              CWL)),
+        14  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
+                              CWL)),
+        15  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
                               CWL)),
         others  => (others => '0'));
 
@@ -136,29 +172,101 @@ not_symm : if not symmetric generate
     constant BUF_SIZE   : natural := natural(ceil(real(N) / real(cores))) * cores;
     constant COEF       : vector_array_CWL(0 to BUF_SIZE-1) := (
         0   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**1) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
                               CWL)),
         1   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**2) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
                               CWL)),
         2   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**3) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
                               CWL)),
         3   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**4) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
                               CWL)),
         4   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**5) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
                               CWL)),
         5   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**6) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
                               CWL)),
         6   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**7) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
                               CWL)),
         7   =>  std_logic_vector(
-                    to_signed(integer(ceil((0.5**8) * 2.0**(CWL-1))), 
+                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
                               CWL)),
+        8   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
+                              CWL)),
+        9   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
+                              CWL)),
+        10  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
+                              CWL)),
+        11  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
+                              CWL)),
+        12  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
+                              CWL)),
+        13  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
+                              CWL)),
+        14  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
+                              CWL)),
+        15  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
+                              CWL)),
+        16  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
+                              CWL)),
+        17  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
+                              CWL)),
+        18  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
+                              CWL)),
+        19  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
+                              CWL)),
+        20  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
+                              CWL)),
+        21   =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
+                              CWL)),
+        22  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
+                              CWL)),
+        23  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
+                              CWL)),
+        24  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
+                              CWL)),
+        25  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
+                              CWL)),
+        26  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
+                              CWL)),
+        27  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
+                              CWL)),
+        28  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
+                              CWL)),
+        29  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
+                              CWL)),
+        30  =>  std_logic_vector(
+                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
+                              CWL)),
+        31  =>  std_logic_vector(
+                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
+                              CWL)),        
         others  => (others => '0'));
 
     signal sig_buf  : vector_array_IWL(0 to BUF_SIZE-1);

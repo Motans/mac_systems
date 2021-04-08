@@ -62,11 +62,11 @@ end component;
     constant    CWL         :   integer := 16;
     constant    OWL         :   integer := 16;
     constant    N           :   natural := 2**10;
-    constant    ORDER       :   natural := 8;
+    constant    ORDER       :   natural := 32;
     constant    ORDER_2     :   integer := integer(ceil(real(ORDER) / 2.0));
     constant    FREQ        :   real    := 1000.0;
     constant    CORES       :   integer := 4;
-    constant    TK          :   integer := integer(ceil(real(ORDER_2) / real(CORES)));
+    constant    TK          :   integer := integer(ceil(real(ORDER) / real(CORES)));
 
     signal      clk         :   std_logic;
     signal      clk_filt    :   std_logic;
@@ -83,7 +83,7 @@ end component;
     clk_filt <= clk;
 
     filt0: mcore_filt
-        generic map(IWL, CWL, OWL, ORDER, CORES, true)
+        generic map(IWL, CWL, OWL, ORDER, CORES, false)
         port map(clk_filt, strobe, reset, sig, out_res);
 
     event: process(clk, reset)
