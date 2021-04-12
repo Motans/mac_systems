@@ -65,7 +65,7 @@ end component;
     constant    ORDER       :   natural := 32;
     constant    ORDER_2     :   integer := integer(ceil(real(ORDER) / 2.0));
     constant    FREQ        :   real    := 1000.0;
-    constant    CORES       :   integer := 4;
+    constant    CORES       :   integer := 3;
     constant    TK          :   integer := integer(ceil(real(ORDER) / real(CORES)));
 
     signal      clk         :   std_logic;
@@ -92,8 +92,8 @@ end component;
         if (reset = '1') then
             i := 0;
         elsif(clk'event and clk = '1') then
-            if (strobe = '1') then 
-                if (i = 0) then 
+            if (strobe = '1') then
+                if (i = 0) then
                     sig <= std_logic_vector(
                         to_signed(2**(IWL-1) - 1, CWL));
                 else
