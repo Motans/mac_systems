@@ -135,15 +135,14 @@ symm : if symmetric generate
     signal      mac_sig1    : vector_array_IWL(0 to cores-1);
     signal      buf0        : vector_array_IWL(0 to BUF_SIZE-1);
     signal      buf1        : vector_array_IWL(0 to BUF_SIZE-1);
-    signal      i           : integer range 0 to BUF_SIZE-1;
+    signal      i           : integer range    0 to BUF_SIZE-1;
   begin
-    -- divide : for j in 0 to N_2-2 generate
-    --     buf0(j) <= sig_buf(j);
-    --     buf1(j) <= sig_buf(N - j - 1);
-    -- end generate;
-
-    buf0(0 to N_2-2) <= sig_buf(0 to N_2-2);
-    buf1(0 to N_2-2) <= sig_buf(N-1 downto N-N_2+1);
+    divide : for j in 0 to N_2-2 generate
+        buf0(j) <= sig_buf(j);
+        buf1(j) <= sig_buf(N - j - 1);
+    end generate;
+    -- buf0(0 to N_2-2) <= sig_buf(0 to N_2-2);
+    -- buf1(0 to 1)     <= sig_buf(N-1 downto N-2);
 
     odd : if (N rem 2 = 1) generate
         buf0(N_2-1) <= sig_buf(N_2-1);
@@ -158,7 +157,7 @@ symm : if symmetric generate
     mac_gen : for k in 0 to cores-1 generate
         mac0: smac
             generic map(IWL, CWL, OWL)
-            port map(clk, strobe, reset, mac_coef(k), 
+            port map(clk, strobe, reset, mac_coef(k),
                      mac_sig0(k), mac_sig1(k), mac_out(k));
 
         mac_sig0(k) <= buf0(i + k);
@@ -171,8 +170,8 @@ symm : if symmetric generate
         if (reset = '1') then
             i       <= 0;
             sig_buf <= (others => (others => '0'));
-            buf0    <= (others => (others => '0'));
-            buf1    <= (others => (others => '0'));
+            buf0(N_2 to BUF_SIZE-1) <= (others => (others => '0'));
+            buf1(N_2 to BUF_SIZE-1) <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
             if (strobe /= '1') then 
                 i <= i + cores;
@@ -289,9 +288,6 @@ not_symm : if not symmetric generate
     signal      buf0        : vector_array_IWL(0 to BUF_SIZE-1);
     signal      i           : integer range    0 to BUF_SIZE-1;
   begin
-    -- rooting : for j in 0 to N-1 generate
-    --     buf0(j) <= std_logic_vector(signed(sig_buf(j)));
-    -- end generate;
     buf0(0 to N-1) <= sig_buf;
 
     mac_gen : for k in 0 to cores-1 generate
@@ -309,7 +305,7 @@ not_symm : if not symmetric generate
         if (reset = '1') then
             i       <= 0;
             sig_buf <= (others => (others => '0'));
-            buf0    <= (others => (others => '0'));
+            buf0(N to BUF_SIZE-1) <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
             if (strobe /= '1') then
                 i <= i + cores;
