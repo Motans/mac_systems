@@ -1,17 +1,40 @@
 library ieee;
+library work;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
+package coef_data is
+    type icoef_arr is array(natural range<>) of integer;
+    constant COEF : icoef_arr := (
+            14,     23,     27,     20,     -6,    -42,    -72,    -81,    -52,      7,
+            79,    122,    105,     23,   -101,   -199,   -216,   -117,     73,    266,
+           358,    272,     14,   -314,   -547,   -527,   -212,    302,    777,    938,
+           617,   -154,  -1081,  -1703,  -1572,   -435,   1606,   4093,   6338,   7668,
+          7668,   6338,   4093,   1606,   -435,  -1572,  -1703,  -1081,   -154,    617,
+           938,    777,    302,   -212,   -527,   -547,   -314,     14,    272,    358,
+           266,     73,   -117,   -216,   -199,   -101,     23,    105,    122,     79,
+             7,    -52,    -81,    -72,    -42,     -6,     20,     27,     23,     14
+    );
+end package;
+
+
+library ieee;
+library work;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.math_real.all;
+use work.coef_data.all;
+
 
 entity mcore_filt is
   generic(
-    IWL         :       natural := 16;              -- input word length
-    CWL         :       natural := 16;              -- coefficient word length
-    OWL         :       natural := 16;              -- output word length
-    N           :       natural := 8;               -- fiter order
-    cores       :       natural := 2;               -- number of cores
-    symmetric   :       boolean);
+    IWL         :       natural;                        -- input word length
+    CWL         :       natural;                        -- coefficient word length
+    OWL         :       natural;                        -- output word length
+    N           :       natural;                        -- fiter order
+    cores       :       natural;                        -- number of cores
+    symmetric   :       boolean);                       -- symmetric filter or else
   port(
     clk         :   in  std_logic;
     strobe      :   in  std_logic;
@@ -25,7 +48,6 @@ architecture mcore_filt_arch of mcore_filt is
     type vector_array_IWL is array (natural range<>) of std_logic_vector(IWL-1 downto 0);
     type vector_array_CWL is array (natural range<>) of std_logic_vector(CWL-1 downto 0);
     type vector_array_OWL is array (natural range<>) of std_logic_vector(OWL-1 downto 0);
-
 component mac_mult is
   generic(
     IWL         :       natural;
@@ -79,58 +101,7 @@ end procedure;
 symm : if symmetric generate
     constant    N_2         : natural := natural(ceil(real(N) / 2.0));
     constant    BUF_SIZE    : natural := natural(ceil(real(N_2) / real(cores))) * cores;
-    constant    COEF        : vector_array_CWL(0 to BUF_SIZE-1) := (
-        0   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
-                              CWL)),
-        1   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
-                              CWL)),
-        2   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
-                              CWL)),
-        3   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
-                              CWL)),
-        4   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
-                              CWL)),
-        5   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
-                              CWL)),
-        6   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
-                              CWL)),
-        7   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
-                              CWL)),
-        8   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
-                              CWL)),
-        9   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
-                              CWL)),
-        10  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
-                              CWL)),
-        11  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
-                              CWL)),
-        12  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
-                              CWL)),
-        13  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
-                              CWL)),
-        14  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
-                              CWL)),
-        15  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
-                              CWL)),
-        others  => (others => '0'));
-
-    
+       
     signal      mac_sig0    : vector_array_IWL(0 to cores-1);
     signal      mac_sig1    : vector_array_IWL(0 to cores-1);
     signal      buf0        : vector_array_IWL(0 to BUF_SIZE-1);
@@ -141,8 +112,6 @@ symm : if symmetric generate
         buf0(j) <= sig_buf(j);
         buf1(j) <= sig_buf(N - j - 1);
     end generate;
-    -- buf0(0 to N_2-2) <= sig_buf(0 to N_2-2);
-    -- buf1(0 to 1)     <= sig_buf(N-1 downto N-2);
 
     odd : if (N rem 2 = 1) generate
         buf0(N_2-1) <= sig_buf(N_2-1);
@@ -162,7 +131,8 @@ symm : if symmetric generate
 
         mac_sig0(k) <= buf0(i + k);
         mac_sig1(k) <= buf1(i + k);
-        mac_coef(k) <= COEF(i + k);
+        mac_coef(k) <= std_logic_vector(
+                to_signed(COEF(i + k), CWL));
     end generate;
 
     symm_main_proc : process(clk, reset)
@@ -186,104 +156,7 @@ end generate;
 
 not_symm : if not symmetric generate
     constant    BUF_SIZE    : natural := natural(ceil(real(N) / real(cores))) * cores;
-    constant    COEF        : vector_array_CWL(0 to BUF_SIZE-1) := (
-        0   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
-                              CWL)),
-        1   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
-                              CWL)),
-        2   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
-                              CWL)),
-        3   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
-                              CWL)),
-        4   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
-                              CWL)),
-        5   =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
-                              CWL)),
-        6   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
-                              CWL)),
-        7   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
-                              CWL)),
-        8   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
-                              CWL)),
-        9   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
-                              CWL)),
-        10  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
-                              CWL)),
-        11  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
-                              CWL)),
-        12  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
-                              CWL)),
-        13  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
-                              CWL)),
-        14  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
-                              CWL)),
-        15  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
-                              CWL)),
-        16  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.196040578454338 * 2.0**(CWL-1))), 
-                              CWL)),
-        17  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.167867384812280 * 2.0**(CWL-1))), 
-                              CWL)),
-        18  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.119829195881356 * 2.0**(CWL-1))), 
-                              CWL)),
-        19  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.065337905676027 * 2.0**(CWL-1))), 
-                              CWL)),
-        20  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.017937981562636 * 2.0**(CWL-1))), 
-                              CWL)),
-        21   =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.013265496183571 * 2.0**(CWL-1))), 
-                              CWL)),
-        22  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.025932499335325 * 2.0**(CWL-1))), 
-                              CWL)),
-        23  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.023880160004658 * 2.0**(CWL-1))), 
-                              CWL)),
-        24  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.014233556164278 * 2.0**(CWL-1))), 
-                              CWL)),
-        25  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.003932564866231 * 2.0**(CWL-1))), 
-                              CWL)),
-        26  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002776106372470 * 2.0**(CWL-1))), 
-                              CWL)),
-        27  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004989659835467 * 2.0**(CWL-1))), 
-                              CWL)),
-        28  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.004132057443708 * 2.0**(CWL-1))), 
-                              CWL)),
-        29  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.002234629082015 * 2.0**(CWL-1))), 
-                              CWL)),
-        30  =>  std_logic_vector(
-                    to_signed(integer(ceil(0.000605885435266 * 2.0**(CWL-1))), 
-                              CWL)),
-        31  =>  std_logic_vector(
-                    to_signed(integer(ceil(-0.000507108001499 * 2.0**(CWL-1))), 
-                              CWL)),        
-        others  => (others => '0'));
+    constant    BUF_COEF    : icoef_arr(0 to BUF_SIZE-1) := (COEF, others => 0);
     signal      mac_sig     : vector_array_IWL(0 to cores-1);
     signal      buf0        : vector_array_IWL(0 to BUF_SIZE-1);
     signal      i           : integer range    0 to BUF_SIZE-1;
@@ -297,7 +170,8 @@ not_symm : if not symmetric generate
                      mac_coef(k), mac_sig(k), mac_out(k));
 
         mac_sig(k)  <= buf0(i + k);
-        mac_coef(k) <= COEF(i + k);
+        mac_coef(k) <= std_logic_vector(
+                to_signed(BUF_COEF(i + k), CWL));
     end generate;
 
     not_symm_main_proc : process(clk, reset)
@@ -305,7 +179,8 @@ not_symm : if not symmetric generate
         if (reset = '1') then
             i       <= 0;
             sig_buf <= (others => (others => '0'));
-            buf0(N to BUF_SIZE-1) <= (others => (others => '0'));
+            buf0(N to BUF_SIZE-1) 
+                    <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
             if (strobe /= '1') then
                 i <= i + cores;
