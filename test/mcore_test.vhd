@@ -61,11 +61,13 @@ end component;
     constant    CWL         :   integer := 16;
     constant    OWL         :   integer := 16;
     constant    STIME       :   natural := 2**10;
+    constant    SYMM        :   boolean := true;                    -- 
     constant    N           :   natural := 80;
     constant    N_2         :   natural := natural(ceil(real(N) / 2.0));
     constant    CORES       :   natural := 7;
     constant    FREQ        :   real    := 1000.0;
     constant    TK          :   integer := integer(ceil(real(N) / real(CORES)));
+    constant    TK_2        :   integer := integer(ceil(real(N_2) / real(CORES)));
 
     signal      clk         :   std_logic;
     signal      clk_filt    :   std_logic;
@@ -76,13 +78,20 @@ end component;
     signal      out_res     :   std_logic_vector(OWL-1 downto 0);
 
   begin
-    clk_event(clk, FREQ, TK*STIME);
-    strobe_event(strobe, FREQ/real(TK), 0.5 sec / FREQ, STIME);
-    reset <= '1', '0' after (real(TK) * sec / FREQ);
+    sym : if (SYMM = true) generate
+        clk_event(clk, FREQ, TK_2*STIME);
+        strobe_event(strobe, FREQ/real(TK_2), 0.5 sec / FREQ, STIME);
+        reset <= '1', '0' after (real(TK_2) * sec / FREQ);
+    end generate;
+    not_sym : if (SYMM = false) generate
+        clk_event(clk, FREQ, TK*STIME);
+        strobe_event(strobe, FREQ/real(TK), 0.5 sec / FREQ, STIME);
+        reset <= '1', '0' after (real(TK) * sec / FREQ);
+    end generate;
     clk_filt <= clk;
 
     filt0: mcore_filt
-        generic map(IWL, CWL, OWL, N, CORES, false)
+        generic map(IWL, CWL, OWL, N, CORES, SYMM)
         port map(clk_filt, strobe, reset, sig, out_res);
 
     event: process(clk, reset)

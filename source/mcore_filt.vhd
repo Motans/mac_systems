@@ -102,28 +102,55 @@ end procedure;
 
 symm : if symmetric generate
     constant    N_2         : natural := natural(ceil(real(N) / 2.0));
-    constant    BUF_SIZE    : natural := natural(ceil(real(N_2) / real(cores))) * cores;
+    constant    CONV_SIZE   : natural := natural(ceil(real(N_2) / real(cores)));
+    constant    TAIL        : natural := N_2 rem CONV_SIZE;
+
+    type conv_IWL is array (natural range<>) of vector_array_IWL(0 to CONV_SIZE-1);
+    type conv_CWL is array (natural range<>) of vector_array_CWL(0 to CONV_SIZE-1);
        
     signal      mac_sig0    : vector_array_IWL(0 to cores-1);
     signal      mac_sig1    : vector_array_IWL(0 to cores-1);
-    signal      buf0        : vector_array_IWL(0 to BUF_SIZE-1);
-    signal      buf1        : vector_array_IWL(0 to BUF_SIZE-1);
-    signal      i           : integer range    0 to BUF_SIZE-1;
+    signal      conv_coef   : conv_CWL(0 to cores-1);
+    signal      conv_buf0   : conv_IWL(0 to cores-1);
+    signal      conv_buf1   : conv_IWL(0 to cores-1);
+    signal      i           : integer range    0 to CONV_SIZE-1;
   begin
-    divide : for j in 0 to N_2-2 generate
-        buf0(j) <= sig_buf(j);
-        buf1(j) <= sig_buf(N - j - 1);
+
+    conv_gen0: for j in 0 to cores-2 generate
+        conv_gen1: for k in 0 to CONV_SIZE-1 generate
+            conv_coef(j)(k) <= std_logic_vector(
+                to_signed(COEF(CONV_SIZE*j + k), CWL));
+
+            conv_buf0(j)(k) <= sig_buf(CONV_SIZE*j + k);
+            conv_buf1(j)(k) <= sig_buf((N-1) - (CONV_SIZE*j + k));
+        end generate;
     end generate;
 
-    odd : if (N rem 2 = 1) generate
-        buf0(N_2-1) <= sig_buf(N_2-1);
-        buf1(N_2-1) <= (others => '0');
+    tail_gen0 : for j in 0 to TAIL-2 generate
+        conv_coef(cores-1)(j) <= std_logic_vector(
+                to_signed(COEF((cores-1)*CONV_SIZE + j), CWL));
+
+        conv_buf0(cores-1)(j) <= sig_buf((cores-1)*CONV_SIZE + j);
+        conv_buf1(cores-1)(j) <= sig_buf((N-1) - ((cores-1)*CONV_SIZE + j));
     end generate;
 
-    even : if (N rem 2 = 0) generate
-        buf0(N_2-1) <= sig_buf(N_2-1);
-        buf1(N_2-1) <= sig_buf(N_2);
+    odd : if (1 = N rem 2) generate
+        conv_coef(cores-1)(TAIL-1) <= std_logic_vector(
+                to_signed(COEF(N_2-1), CWL));
+        conv_buf0(cores-1)(TAIL-1) <= sig_buf(N_2-1);
+        conv_buf1(cores-1)(TAIL-1) <= (others => '0');
     end generate;
+
+    even : if (0 = N rem 2) generate
+        conv_coef(cores-1)(TAIL-1) <= std_logic_vector(
+                to_signed(COEF(N_2-1), CWL));
+        conv_buf0(cores-1)(TAIL-1) <= sig_buf(N_2-1);
+        conv_buf1(cores-1)(TAIL-1) <= sig_buf(N_2);
+    end generate;
+
+    conv_coef(cores-1)(TAIL to CONV_SIZE-1) <= (others => (others => '0'));
+    conv_buf0(cores-1)(TAIL to CONV_SIZE-1) <= (others => (others => '0'));
+    conv_buf1(cores-1)(TAIL to CONV_SIZE-1) <= (others => (others => '0'));
 
     mac_gen : for k in 0 to cores-1 generate
         mac0: smac
@@ -131,10 +158,9 @@ symm : if symmetric generate
             port map(clk, strobe, reset, mac_coef(k),
                      mac_sig0(k), mac_sig1(k), mac_out(k));
 
-        mac_sig0(k) <= buf0(i + k);
-        mac_sig1(k) <= buf1(i + k);
-        mac_coef(k) <= std_logic_vector(
-                to_signed(COEF(i + k), CWL));
+        mac_sig0(k) <= conv_buf0(k)(i);
+        mac_sig1(k) <= conv_buf1(k)(i);
+        mac_coef(k) <= conv_coef(k)(i);
     end generate;
 
     symm_main_proc : process(clk, reset)
@@ -142,11 +168,9 @@ symm : if symmetric generate
         if (reset = '1') then
             i       <= 0;
             sig_buf <= (others => (others => '0'));
-            buf0(N_2 to BUF_SIZE-1) <= (others => (others => '0'));
-            buf1(N_2 to BUF_SIZE-1) <= (others => (others => '0'));
         elsif (clk'event and clk = '1') then
             if (strobe /= '1') then 
-                i <= i + cores;
+                i <= i + 1;
             else
                 i       <= 0;
                 push_front(sig_buf, sig_in);
@@ -178,9 +202,9 @@ not_symm : if not symmetric generate
     end generate;
     tail_gen0 : for j in 0 to TAIL-1 generate
         conv_coef(cores-1)(j) <= std_logic_vector(
-                to_signed(COEF((cores-2)*CONV_SIZE + j), CWL));
+                to_signed(COEF((cores-1)*CONV_SIZE + j), CWL));
 
-        conv_buf(cores-1)(j) <= sig_buf((cores-2)*CONV_SIZE + j);
+        conv_buf (cores-1)(j) <= sig_buf((cores-1)*CONV_SIZE + j);
     end generate;
 
     conv_coef(cores-1)(TAIL to CONV_SIZE-1) <= (others => (others => '0'));
