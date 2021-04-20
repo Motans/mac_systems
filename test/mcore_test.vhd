@@ -57,11 +57,27 @@ component mcore_filt is
     sig_out     :   out std_logic_vector(OWL-1 downto 0));
 end component;
 
-    constant    IWL         :   integer := 16;
-    constant    CWL         :   integer := 16;
-    constant    OWL         :   integer := 16;
-    constant    STIME       :   natural := 2**10;
-    constant    SYMM        :   boolean := true;                    -- 
+component nco is
+  generic(
+    dig_size    :       natural;
+    acc_size    :       natural;
+    quant_size  :       natural;
+    F_s         :       natural
+  );
+  port(
+    clk         :   in  std_logic;
+    reset       :   in  std_logic;
+    phase_inc   :   in  std_logic_vector(acc_size-1 downto 0);
+    sin_out     :   out std_logic_vector(dig_size-1 downto 0);
+    cos_out     :   out std_logic_vector(dig_size-1 downto 0)
+  );
+end component;
+
+    constant    IWL         :   integer := 18;
+    constant    CWL         :   integer := 18;
+    constant    OWL         :   integer := 18;
+    constant    STIME       :   natural := 2**12;
+    constant    SYMM        :   boolean := false;                    -- 
     constant    N           :   natural := 80;
     constant    N_2         :   natural := natural(ceil(real(N) / 2.0));
     constant    CORES       :   natural := 7;
@@ -69,11 +85,18 @@ end component;
     constant    TK          :   integer := integer(ceil(real(N) / real(CORES)));
     constant    TK_2        :   integer := integer(ceil(real(N_2) / real(CORES)));
 
+    constant    ACC_SIZE        :   integer := 18;
+    constant    QUANT_SIZE      :   integer := 12;
+    constant    F_s             :   integer := 44100;
+
     signal      clk         :   std_logic;
     signal      clk_filt    :   std_logic;
     signal      strobe      :   std_logic;
     signal      reset       :   std_logic;
 
+    signal      phase_inc   :   std_logic_vector(ACC_SIZE-1 downto 0);
+    signal      sin_x       :   std_logic_vector(IWL-1 downto 0);
+    signal      cos_x       :   std_logic_vector(IWL-1 downto 0);
     signal      sig         :   std_logic_vector(IWL-1 downto 0);
     signal      out_res     :   std_logic_vector(OWL-1 downto 0);
 
@@ -90,9 +113,19 @@ end component;
     end generate;
     clk_filt <= clk;
 
+    phase_inc <= std_logic_vector(
+        to_unsigned(128, ACC_SIZE));
+
+    nco0: nco
+        generic map( IWL,
+                     ACC_SIZE,
+                     QUANT_SIZE,
+                     F_s)
+        port map(strobe, reset, phase_inc, sin_x, cos_x);
+    
     filt0: mcore_filt
         generic map(IWL, CWL, OWL, N, CORES, SYMM)
-        port map(clk_filt, strobe, reset, sig, out_res);
+        port map(clk_filt, strobe, reset, sin_x, out_res);
 
     event: process(clk, reset)
         variable i : integer;
@@ -101,12 +134,12 @@ end component;
             i := 0;
         elsif(clk'event and clk = '1') then
             if (strobe = '1') then
-                if (i = 0) then
+                -- if (i = 0) then
                     sig <= std_logic_vector(
-                        to_signed(2**(IWL-1) - 1, CWL));
-                else
-                    sig <= (others => '0');
-                end if;
+                        to_signed(2**(16) - 1, CWL));
+                -- else
+                --     sig <= (others => '0');
+                -- end if;
                 i := i + 1;
             end if;
         end if;

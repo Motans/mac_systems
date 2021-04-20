@@ -7,14 +7,15 @@ use ieee.math_real.all;
 package coef_data is
     type icoef_arr is array(natural range<>) of integer;
     constant COEF : icoef_arr := (
-            14,     23,     27,     20,     -6,    -42,    -72,    -81,    -52,      7,
-            79,    122,    105,     23,   -101,   -199,   -216,   -117,     73,    266,
-           358,    272,     14,   -314,   -547,   -527,   -212,    302,    777,    938,
-           617,   -154,  -1081,  -1703,  -1572,   -435,   1606,   4093,   6338,   7668,
-          7668,   6338,   4093,   1606,   -435,  -1572,  -1703,  -1081,   -154,    617,
-           938,    777,    302,   -212,   -527,   -547,   -314,     14,    272,    358,
-           266,     73,   -117,   -216,   -199,   -101,     23,    105,    122,     79,
-             7,    -52,    -81,    -72,    -42,     -6,     20,     27,     23,     14
+            53,      92,     105,      79,     -26,    -170,    -288,    -327,    -209,      
+            27,     315,     485,     420,      92,    -406,    -799,    -865,    -471,     
+           289,    1062,    1429,    1088,      53,   -1258,   -2188,   -2110,    -851,    
+          1206,    3107,    3749,    2465,    -616,   -4325,   -6815,   -6291,   -1743,    
+          6423,   16371,   25350,   30671,   30671,   25350,   16371,    6423,   -1743,   
+         -6291,   -6815,   -4325,    -616,    2465,    3749,    3107,    1206,    -851,   
+         -2110,   -2188,   -1258,      53,    1088,    1429,    1062,     289,    -471,    
+          -865,    -799,    -406,      92,     420,     485,     315,      27,    -209,    
+          -327,    -288,    -170,     -26,      79,     105,      92,      53
     );
 end package;
 
@@ -29,12 +30,12 @@ use work.coef_data.all;
 
 entity mcore_filt is
   generic(
-    IWL         :       natural := 16;                        -- input word length
-    CWL         :       natural := 16;                        -- coefficient word length
-    OWL         :       natural := 16;                        -- output word length
-    N           :       natural := 80;                        -- fiter order
-    cores       :       natural := 7;                        -- number of cores
-    symmetric   :       boolean := true);                       -- symmetric filter or else
+    IWL         :       natural := 16;                      -- input word length
+    CWL         :       natural := 16;                      -- coefficient word length
+    OWL         :       natural := 16;                      -- output word length
+    N           :       natural := 80;                      -- fiter order
+    cores       :       natural := 7;                       -- number of cores
+    symmetric   :       boolean := true);                   -- symmetric filter or else
   port(
     clk         :   in  std_logic;
     strobe      :   in  std_logic;

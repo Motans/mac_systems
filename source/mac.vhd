@@ -23,7 +23,7 @@ end mac_mult;
 architecture mac_mult_arch of mac_mult is
     constant AWL : natural := IWL + CWL;
   begin
-    mac_main_pr : process(clk)
+    mac_main_pr : process(clk, reset)
         variable acc        : signed(AWL-1 downto 0);
         variable sat_res    : signed(OWL   downto 0);
         variable res        : signed(OWL-1 downto 0);
