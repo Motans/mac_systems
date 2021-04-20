@@ -29,12 +29,12 @@ use work.coef_data.all;
 
 entity mcore_filt is
   generic(
-    IWL         :       natural;                        -- input word length
-    CWL         :       natural;                        -- coefficient word length
-    OWL         :       natural;                        -- output word length
-    N           :       natural;                        -- fiter order
-    cores       :       natural;                        -- number of cores
-    symmetric   :       boolean);                       -- symmetric filter or else
+    IWL         :       natural := 16;                        -- input word length
+    CWL         :       natural := 16;                        -- coefficient word length
+    OWL         :       natural := 16;                        -- output word length
+    N           :       natural := 80;                        -- fiter order
+    cores       :       natural := 7;                        -- number of cores
+    symmetric   :       boolean := true);                       -- symmetric filter or else
   port(
     clk         :   in  std_logic;
     strobe      :   in  std_logic;
