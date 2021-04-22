@@ -5,17 +5,18 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 package coef_data is
-    type icoef_arr is array(natural range<>) of integer;
-    constant COEF : icoef_arr := (
-            53,      92,     105,      79,     -26,    -170,    -288,    -327,    -209,      
-            27,     315,     485,     420,      92,    -406,    -799,    -865,    -471,     
-           289,    1062,    1429,    1088,      53,   -1258,   -2188,   -2110,    -851,    
-          1206,    3107,    3749,    2465,    -616,   -4325,   -6815,   -6291,   -1743,    
-          6423,   16371,   25350,   30671,   30671,   25350,   16371,    6423,   -1743,   
-         -6291,   -6815,   -4325,    -616,    2465,    3749,    3107,    1206,    -851,   
-         -2110,   -2188,   -1258,      53,    1088,    1429,    1062,     289,    -471,    
-          -865,    -799,    -406,      92,     420,     485,     315,      27,    -209,    
-          -327,    -288,    -170,     -26,      79,     105,      92,      53
+    type rcoef_arr is array(natural range<>) of real;
+    constant COEF : rcoef_arr := (
+         0.0004,    0.0007,    0.0008,    0.0006,   -0.0002,   -0.0013,   -0.0022,   -0.0025,   
+        -0.0016,    0.0002,    0.0024,    0.0037,    0.0032,    0.0007,   -0.0031,   -0.0061,   
+        -0.0066,   -0.0036,    0.0022,    0.0081,    0.0109,    0.0083,    0.0004,   -0.0096,   
+        -0.0167,   -0.0161,   -0.0065,    0.0092,    0.0237,    0.0286,    0.0188,   -0.0047,   
+        -0.0330,   -0.0520,   -0.0480,   -0.0133,    0.0490,    0.1249,    0.1934,    0.2340,    
+         0.2340,    0.1934,    0.1249,    0.0490,   -0.0133,   -0.0480,   -0.0520,   -0.0330,   
+        -0.0047,    0.0188,    0.0286,    0.0237,    0.0092,   -0.0065,   -0.0161,   -0.0167,   
+        -0.0096,    0.0004,    0.0083,    0.0109,    0.0081,    0.0022,   -0.0036,   -0.0066,   
+        -0.0061,   -0.0031,    0.0007,    0.0032,    0.0037,    0.0024,    0.0002,   -0.0016,   
+        -0.0025,   -0.0022,   -0.0013,   -0.0002,    0.0006,    0.0008,    0.0007,    0.0004
     );
 end package;
 
@@ -120,7 +121,7 @@ symm : if symmetric generate
     conv_gen0: for j in 0 to cores-2 generate
         conv_gen1: for k in 0 to CONV_SIZE-1 generate
             conv_coef(j)(k) <= std_logic_vector(
-                to_signed(COEF(CONV_SIZE*j + k), CWL));
+                to_signed(integer(ceil(COEF(CONV_SIZE*j + k) * 2.0**(CWL-1))), CWL));
 
             conv_buf0(j)(k) <= sig_buf(CONV_SIZE*j + k);
             conv_buf1(j)(k) <= sig_buf((N-1) - (CONV_SIZE*j + k));
@@ -129,7 +130,7 @@ symm : if symmetric generate
 
     tail_gen0 : for j in 0 to TAIL-2 generate
         conv_coef(cores-1)(j) <= std_logic_vector(
-                to_signed(COEF((cores-1)*CONV_SIZE + j), CWL));
+                to_signed(integer(ceil(COEF((cores-1)*CONV_SIZE + j) * 2.0**(CWL-1))), CWL));
 
         conv_buf0(cores-1)(j) <= sig_buf((cores-1)*CONV_SIZE + j);
         conv_buf1(cores-1)(j) <= sig_buf((N-1) - ((cores-1)*CONV_SIZE + j));
@@ -137,14 +138,14 @@ symm : if symmetric generate
 
     odd : if (1 = N rem 2) generate
         conv_coef(cores-1)(TAIL-1) <= std_logic_vector(
-                to_signed(COEF(N_2-1), CWL));
+                to_signed(integer(ceil(COEF(N_2-1) * 2.0**(CWL-1))), CWL));
         conv_buf0(cores-1)(TAIL-1) <= sig_buf(N_2-1);
         conv_buf1(cores-1)(TAIL-1) <= (others => '0');
     end generate;
 
     even : if (0 = N rem 2) generate
         conv_coef(cores-1)(TAIL-1) <= std_logic_vector(
-                to_signed(COEF(N_2-1), CWL));
+                to_signed(integer(ceil(COEF(N_2-1) * 2.0**(CWL-1))), CWL));
         conv_buf0(cores-1)(TAIL-1) <= sig_buf(N_2-1);
         conv_buf1(cores-1)(TAIL-1) <= sig_buf(N_2);
     end generate;
@@ -196,14 +197,14 @@ not_symm : if not symmetric generate
     conv_gen0: for j in 0 to cores-2 generate
         conv_gen1: for k in 0 to CONV_SIZE-1 generate
             conv_coef(j)(k) <= std_logic_vector(
-                to_signed(COEF(CONV_SIZE*j + k), CWL));
+                to_signed(integer(ceil(COEF(CONV_SIZE*j + k) * 2.0**(CWL-1))), CWL));
 
             conv_buf(j)(k) <= sig_buf(CONV_SIZE*j + k);
         end generate;
     end generate;
     tail_gen0 : for j in 0 to TAIL-1 generate
         conv_coef(cores-1)(j) <= std_logic_vector(
-                to_signed(COEF((cores-1)*CONV_SIZE + j), CWL));
+                to_signed(integer(ceil(COEF((cores-1)*CONV_SIZE + j) * 2.0**(CWL-1))), CWL));
 
         conv_buf (cores-1)(j) <= sig_buf((cores-1)*CONV_SIZE + j);
     end generate;
